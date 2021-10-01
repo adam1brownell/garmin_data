@@ -21,7 +21,8 @@ def main(argv):
          outputfile = arg
 
     print('Reading Data...')
-    bd_data = pd.read_csv(inputfile, on_bad_lines="skip")
+    bd_data = pd.read_csv(inputfile, on_bad_lines="skip", low_memory=False)
+    print(f" Loaded in all {len(bd_data):,} rows of unclean data...")
 
     print("Filtering Down to Data...")
     ### Filter down to Data ###
@@ -37,7 +38,7 @@ def main(argv):
             num = col.split()[1]
             vals = bd_data[col].unique()
             for v in vals:
-                if (v is in ['unknown','software_version']) or pd.isna(v):
+                if (v in ['unknown','software_version','data16','data']) or pd.isna(v):
                     continue
                 if v not in bd_data.columns:
                     bd_data[str(v)] = None
@@ -58,8 +59,8 @@ def main(argv):
     if 'timestamp_16' in bd_data.columns:
         place = 1
         for i in bd_data.index[1:]:
-            # If timestamp 16 is a number...
-            if not pd.isna(bd_data.loc[i].timestamp_16):
+            # If timestamp 16 is a number and timestamp empty...
+            if (not pd.isna(bd_data.loc[i].timestamp_16)) and (pd.isna(bd_data.loc[i].timestamp)):
                 # Go back up index...
                 for j in reversed(bd_data.index[:place]):
                     # Find the most recent timestamp
@@ -89,6 +90,7 @@ def main(argv):
         g_dict[col] = lambda x: np.max(x)
 
     bd_data = bd_data.groupby('timestamp').agg(g_dict).drop(['timestamp'],axis=1).reset_index()
+    print(f" Reduced down file to {len(bd_data):,} rows of CLEAN data...")
     print("Saving...")
     bd_data.to_csv(outputfile)
     print("Done!")
