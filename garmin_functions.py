@@ -23,19 +23,31 @@ def build_health_snapshot_data(file_name):
         j = json.load(file)
 
     name = []
-    start = []
-    end = []
+    
+    ## Including both times because sleep data + others don't have that
+    start_local = []
+    end_local = []
+    start_gmt = []
+    end_gmt = []
+
     day_type = []
 
     # These are must-have feautres for snapshot to count
     for i in range(len(j)):
         sesh = j[i]
+
         name.append(sesh['activityName'])
-        start.append(sesh['startTimestampLocal'])
-        end.append(sesh['endTimestampLocal'])
+
+        start_local.append(pd.Timestamp(sesh['startTimestampLocal']))
+        end_local.append(pd.Timestamp(sesh['endTimestampLocal']))
+
+        start_gmt.append(pd.Timestamp(sesh['startTimestampGMT']))
+        end_gmt.append(pd.Timestamp(sesh['endTimestampGMT']))
         day_type.append(sesh['snapshotTimeOfDayType'])
 
-    health_snap_pd = pd.DataFrame({"name":name,"start_time":start,"end_time":end,"time_of_day":day_type})
+    health_snap_pd = pd.DataFrame({"name":name,"time_of_day":day_type,
+                                   "local_start_time":start_local,"local_end_time":end_local,
+                                   "gmt_start_time":start_gmt,"gmt_end_time":end_gmt})
 
     health_snap_pd['hr_min'] = np.nan
     health_snap_pd['hr_max'] = np.nan
