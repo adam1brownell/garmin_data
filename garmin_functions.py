@@ -99,3 +99,82 @@ def build_health_snapshot_data(file_name):
                 health_snap_pd.loc[i,col] = metric[lev]
 
     return(health_snap_pd)
+
+# _sleepData.json'
+def build_sleep_data(file_name):
+    """
+    Take in ...sleepData.json file and output pandas
+
+    Input:
+        file_name | str
+            _sleepData file
+    Output
+        sleep_pd | pdf
+            pandas dataframe of sleep data
+    """
+
+    with open(file_name) as file:
+        j = json.load(file)
+
+    # These are must-have feautres for sleep sesh to count
+    sleep_start = []
+    sleep_end = []
+    date = []
+
+    for i in range(len(j)):
+        sesh = j[i]
+        sleep_start.append(sesh['sleepStartTimestampGMT'])
+        sleep_end.append(sesh['sleepEndTimestampGMT'])
+        date.append(sesh['calendarDate'])
+
+    sleep_pd = pd.DataFrame({"gmtStart":sleep_start,"gmtEnd":sleep_end,"date":date})
+
+    # There are metrics that could be dropped by snapshot
+    # hence the double loop
+    sleep_pd['sleepWindowConfirmationType'] = np.nan
+    sleep_pd['deepSleepSeconds'] = np.nan
+    sleep_pd['lightSleepSeconds'] = np.nan
+    sleep_pd['remSleepSeconds'] = np.nan
+    sleep_pd['awakeSleepSeconds'] = np.nan
+    sleep_pd['unmeasurableSeconds'] = np.nan
+    sleep_pd['averageRespiration'] = np.nan
+    sleep_pd['lowestRespiration'] = np.nan
+    sleep_pd['highestRespiration'] = np.nan
+    sleep_pd['retro'] = np.nan
+    sleep_pd['awakeCount'] = np.nan
+    sleep_pd['avgSleepStress'] = np.nan
+
+    sleep_pd['overallScore'] = np.nan
+    sleep_pd['qualityScore'] = np.nan
+    sleep_pd['durationScore'] = np.nan
+    sleep_pd['recoveryScore'] = np.nan
+    sleep_pd['deepScore'] = np.nan
+    sleep_pd['lightScore'] = np.nan
+    sleep_pd['awakeningsCountScore'] = np.nan
+    sleep_pd['awakeTimeScore'] = np.nan
+    sleep_pd['combinedAwakeScore'] = np.nan
+    sleep_pd['restfulnessScore'] = np.nan
+    sleep_pd['feedback'] = np.nan
+    sleep_pd['insight'] = np.nan
+
+    for i in range(len(j)):
+        sesh = j[i]
+        for key, value in sesh.items():
+            # Already good
+            if key in ['sleepStartTimestampGMT','sleepEndTimestampGMT','calendarDate']:
+                continue
+            # Sleep Scores
+            elif key == 'sleepScores':
+                for sleep_key, score in sesh[key].items():
+                    sleep_pd.loc[i,sleep_key] = score
+            elif key in sleep_pd.columns:
+                sleep_pd.loc[i,key] = value
+            else:
+                raise Exception(f"Adam didn't account for {key} metric in snapshot! Let him know!!")
+
+
+    # Rename bc I hate this column phrasing
+    sleep_pd = sleep_pd.rename(columns= {"averageRespiration":"respirationAvg",
+                                "lowestRespiration":"respirationMin",
+                                "highestRespiration":"respirationMax"})
+    return(sleep_pd)

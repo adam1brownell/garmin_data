@@ -12,6 +12,8 @@ def main(connect_folder):
             for file_name in os.listdir(tmp_folder):
                 if 'wellnessActivities' in file_name:
                     health_snapshot_pd = build_health_snapshot_data(tmp_folder+'/'+file_name)
+                elif 'sleepData' in file_name:
+                    sleep_pd = build_sleep_data(tmp_folder+'/'+file_name)
     return
 
 if __name__ == '__main__':
