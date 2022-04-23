@@ -23,7 +23,7 @@ def build_health_snapshot_data(file_name):
         j = json.load(file)
 
     name = []
-    
+
     ## Including both times because sleep data + others don't have that
     start_local = []
     end_local = []
@@ -45,28 +45,28 @@ def build_health_snapshot_data(file_name):
         end_gmt.append(pd.Timestamp(sesh['endTimestampGMT']))
         day_type.append(sesh['snapshotTimeOfDayType'])
 
-    health_snap_pd = pd.DataFrame({"name":name,"time_of_day":day_type,
-                                   "local_start_time":start_local,"local_end_time":end_local,
-                                   "gmt_start_time":start_gmt,"gmt_end_time":end_gmt})
+    health_snap_pd = pd.DataFrame({"name":name,"timeOfDay":day_type,
+                                   "localStart":start_local,"localEnd":end_local,
+                                   "gmtStart":start_gmt,"gmtEnd":end_gmt})
 
-    health_snap_pd['hr_min'] = np.nan
-    health_snap_pd['hr_max'] = np.nan
-    health_snap_pd['hr_avg'] = np.nan
+    health_snap_pd['heartRateMin'] = np.nan
+    health_snap_pd['heartRateMax'] = np.nan
+    health_snap_pd['heartRateAvg'] = np.nan
 
-    health_snap_pd['resp_min'] = np.nan
-    health_snap_pd['resp_max'] = np.nan
-    health_snap_pd['resp_avg'] = np.nan
+    health_snap_pd['respirationMin'] = np.nan
+    health_snap_pd['respirationMax'] = np.nan
+    health_snap_pd['respirationAvg'] = np.nan
 
-    health_snap_pd['stress_min'] = np.nan
-    health_snap_pd['stress_max'] = np.nan
-    health_snap_pd['stress_avg'] = np.nan
+    health_snap_pd['stressMin'] = np.nan
+    health_snap_pd['stressMax'] = np.nan
+    health_snap_pd['stressAvg'] = np.nan
 
-    health_snap_pd['spo2_min'] = np.nan
-    health_snap_pd['spo2_max'] = np.nan
-    health_snap_pd['spo2_avg'] = np.nan
+    health_snap_pd['spo2Min'] = np.nan
+    health_snap_pd['spo2Max'] = np.nan
+    health_snap_pd['spo2Avg'] = np.nan
 
-    health_snap_pd['hrv_rmsdd'] = np.nan
-    health_snap_pd['hrv_sdnn'] = np.nan
+    health_snap_pd['hrvRMSSD'] = np.nan
+    health_snap_pd['hrvSDNN'] = np.nan
 
 
 
@@ -79,18 +79,18 @@ def build_health_snapshot_data(file_name):
 
             ## Why can't python have switch statements...
             if metric_type == 'HEART_RATE':
-                cols = ['hr_min','hr_max','hr_avg']
+                cols = ['heartRateMin','heartRateMax','heartRateAvg']
             elif metric_type == 'RESPIRATION':
-                cols = ['resp_min','resp_max','resp_avg']
+                cols = ['respirationMin','respirationMax','respirationAvg']
             elif metric_type == 'STRESS':
-                cols = ['stress_min','stress_max','stress_avg']
+                cols = ['stressMin','stressMax','stressAvg']
             elif metric_type == 'SPO2':
-                cols = ['spo2_min','spo2_max','spo2_avg']
+                cols = ['spo2Min','spo2Max','spo2Avg']
             elif metric_type == 'RMSSD_HRV':
-                health_snap_pd.loc[i,'hrv_rmsdd'] = metric['avgValue']
+                health_snap_pd.loc[i,'hrvRMSSD'] = metric['avgValue']
                 continue
             elif metric_type == 'SDRR_HRV':
-                health_snap_pd.loc[i,'hrv_sdnn'] = metric['avgValue']
+                health_snap_pd.loc[i,'hrvSDNN'] = metric['avgValue']
                 continue
             else:
                 raise Exception(f"Adam didn't account for {metric_type} metric in snapshot! Let him know!!")
