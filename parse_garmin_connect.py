@@ -10,8 +10,8 @@ def main(connect_folder):
         if folder_name == 'DI-Connect-Wellness':
             tmp_folder = tmp_root+'/'+folder_name
             for file_name in os.listdir(tmp_folder):
-                if 'wellnessActivities' in file_name
-                health_snapshot_pd = build_health_snapshot_data(tmp_folder+'/'+file_name)
+                if 'wellnessActivities' in file_name:
+                    health_snapshot_pd = build_health_snapshot_data(tmp_folder+'/'+file_name)
     return
 
 if __name__ == '__main__':

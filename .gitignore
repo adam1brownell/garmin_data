@@ -2,3 +2,4 @@
 garmin_data_parse.ipynb
 .ipynb_checkpoints/*
 DI_CONNECT/*
+__pycache__/*
