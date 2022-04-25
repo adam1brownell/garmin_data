@@ -14,6 +14,15 @@ def main(connect_folder):
                     health_snapshot_pd = build_health_snapshot_data(tmp_folder+'/'+file_name)
                 elif 'sleepData' in file_name:
                     sleep_pd = build_sleep_data(tmp_folder+'/'+file_name)
+                    
+        ### DI-Connect-Fitness Files ###
+        elif folder_name == 'DI-Connect-Fitness':
+            tmp_folder = tmp_root+'/'+folder_name
+            for file_name in os.listdir(tmp_folder):
+                if 'summarizedActivitie' in file_name:
+                    activity_pd,activity_set_pd = build_activity_summary_data(tmp_folder+'/'+file_name)
+
+
     return
 
 if __name__ == '__main__':

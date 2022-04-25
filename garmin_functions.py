@@ -178,3 +178,103 @@ def build_sleep_data(file_name):
                                 "lowestRespiration":"respirationMin",
                                 "highestRespiration":"respirationMax"})
     return(sleep_pd)
+
+### DI-Connect-Fitness Files ###
+
+# summarizedActivities.json
+def build_activity_summary_data(file_name):
+    """
+        Take in ...summarizedActivities.json file and output pandas
+        IT IS possible to return empty pdfs, since optional to use activities feature
+
+        Input:
+            file_name | str
+                _summarizedActivities file
+        Output
+            activity_pd | pdf
+                pandas dataframe of summarized activity data
+            activity_set_pd | pdf
+                pandas dataframe of summarized sets of activity data
+    """
+
+    with open(file_name) as file:
+        j = json.load(file)
+
+    activity_pd = pd.DataFrame()
+
+    activity_pd['activityId'] = np.nan
+    activity_pd['name'] = np.nan
+    activity_pd['activityType'] = np.nan
+    activity_pd['sportType'] = np.nan
+
+    activity_pd['eventTypeId'] = np.nan
+    activity_pd['startTimeGmt'] = np.nan
+    activity_pd['startTimeLocal'] = np.nan
+    activity_pd['duration'] = np.nan
+    activity_pd['distance'] = np.nan
+    activity_pd['avgSpeed'] = np.nan
+    activity_pd['avgHr'] = np.nan
+    activity_pd['maxHr'] = np.nan
+    activity_pd['calories'] = np.nan
+    activity_pd['bmrCalories'] = np.nan
+    activity_pd['waterEstimated'] = np.nan
+    activity_pd['moderateIntensityMinutes'] = np.nan
+    activity_pd['vigorousIntensityMinutes'] = np.nan
+    activity_pd['purposeful'] = np.nan
+    activity_pd['pr'] = np.nan
+
+    activity_pd['elevationGain'] = np.nan
+    activity_pd['elevationLoss'] = np.nan
+    activity_pd['minElevation'] = np.nan
+    activity_pd['maxElevation'] = np.nan
+
+    activity_pd['maxSpeed'] = np.nan
+    activity_pd['maxVerticalSpeed'] = np.nan
+
+    activity_pd['steps'] = np.nan
+    activity_pd['locationName'] = np.nan
+
+    activity_pd['minRespirationRate'] = np.nan
+    activity_pd['maxRespirationRate'] = np.nan
+    activity_pd['avgRespirationRate'] = np.nan
+
+    activity_pd['avgFractionalCadence'] = np.nan
+    activity_pd['maxFractionalCadence'] = np.nan
+
+    activity_pd['startStress'] = np.nan
+    activity_pd['endStress'] = np.nan
+    activity_pd['differenceStress'] = np.nan
+
+    activity_pd['summarizedExerciseSets'] = np.nan
+    activity_pd['activeSets'] = np.nan
+    activity_pd['totalSets'] = np.nan
+    activity_pd['totalReps'] = np.nan
+
+    activity_set_pd = pd.DataFrame()
+    activity_set_pd['activityId'] = np.nan
+    activity_set_pd['startTimeGmt'] = np.nan
+
+    activity_set_pd['category'] = np.nan
+    activity_set_pd['subCategory'] = np.nan
+    activity_set_pd['reps'] = np.nan
+    activity_set_pd['volume'] = np.nan
+    activity_set_pd['duration'] = np.nan
+    activity_set_pd['sets'] = np.nan
+    set_row = 0
+
+    for i in range(len(j[0]['summarizedActivitiesExport'])):
+        sesh = j[0]['summarizedActivitiesExport'][i]
+        for key, value in sesh.items():
+            if key == 'summarizedExerciseSets':
+                e = sesh['summarizedExerciseSets']
+                start_row = set_row
+                for ii in range(len(e)):
+                    for s_key, s_value in e[ii].items():
+                        activity_set_pd.loc[set_row,s_key]=s_value
+                    set_row+=1
+                activity_set_pd.loc[start_row:set_row, "activityId"] = sesh['activityId']
+                activity_set_pd.loc[start_row:set_row, "startTimeGmt"] = sesh['startTimeGmt']
+            elif key in activity_pd.columns:
+                activity_pd.loc[i,key] = value
+
+    return(activity_pd,activity_set_pd)
