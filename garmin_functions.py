@@ -179,6 +179,51 @@ def build_sleep_data(file_name):
                                 "highestRespiration":"respirationMax"})
     return(sleep_pd)
 
+### DI-Connect-User Files
+
+# FitnessAgeData.json
+def build_fitness_age_data(file_name):
+    with open(file_name) as file:
+        j = json.load(file)
+    ts = []
+    for i in range(len(j)):
+        ts.append(j[i]["createTimestamp"]['date'])
+
+    fitness_age_pd = pd.DataFrame({"readingTimestamp":ts})
+
+    fitness_age_pd['chronologicalAge'] = np.nan
+
+    fitness_age_pd['bmi'] = np.nan
+    fitness_age_pd['rhr'] = np.nan
+    fitness_age_pd['totalVigorousDays'] = np.nan
+    fitness_age_pd['numOfWeeksForIM'] = np.nan
+    fitness_age_pd['healthyBmi'] = np.nan
+    fitness_age_pd['healthyFat'] = np.nan
+    fitness_age_pd['vo2MaxForHealthyBmiFat'] = np.nan
+    fitness_age_pd['vo2MaxForHealthyActive'] = np.nan
+    fitness_age_pd['biometricVo2Max'] = np.nan
+    fitness_age_pd['currentBioAge'] = np.nan
+
+    fitness_age_pd['healthyAllBioAge'] = np.nan
+    fitness_age_pd['healthyBmiFatBioAge'] = np.nan
+    fitness_age_pd['healthyActiveBioAge'] = np.nan
+
+    fitness_age_pd['weightDataLastEntryDate'] = np.nan
+    fitness_age_pd['rhrLastEntryDate'] = np.nan
+    fitness_age_pd['totalVigorousIMs'] = np.nan
+
+    for i in range(len(j)):
+        sesh = j[i]
+        for k,v in sesh.items():
+            if k in ['createTimestamp','asOfDateGmt']:
+                continue
+            elif k in ['weightDataLastEntryDate','rhrLastEntryDate']:\
+                fitness_age_pd.loc[i,k] = v['date']
+            elif k in fitness_age_pd.columns:
+                fitness_age_pd.loc[i,k] = v
+    return(fitness_age_pd)
+
+
 ### DI-Connect-Fitness Files ###
 
 # summarizedActivities.json
