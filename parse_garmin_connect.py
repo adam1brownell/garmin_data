@@ -19,7 +19,8 @@ def main(connect_folder):
             for file_name in os.listdir(tmp_folder):
                 if 'FitnessAgeData' in file_name:
                     fitness_age_pd = build_fitness_age_data(tmp_folder+'/'+file_name)
-                    
+                elif 'HydrationLogFile' in file_name:
+                    hydration_pd = build_hydration_data(tmp_folder+'/'+file_name)
         ### DI-Connect-Fitness Files ###
         elif folder_name == 'DI-Connect-Fitness':
             for file_name in os.listdir(tmp_folder):

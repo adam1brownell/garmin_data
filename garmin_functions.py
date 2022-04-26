@@ -223,7 +223,47 @@ def build_fitness_age_data(file_name):
                 fitness_age_pd.loc[i,k] = v
     return(fitness_age_pd)
 
+# HydrationLogFile
+def build_hydration_data(file_name):
+    with open(file_name) as file:
+        j = json.load(file)
 
+    ts_g = []
+    ts_l = []
+    for i in range(len(j)):
+        ts_g.append(j[i]['persistedTimestampGMT']['date'])
+        ts_l.append(j[i]['timestampLocal']['date'])
+
+    hydrate_pd = pd.DataFrame({"timestampGMT":ts_g,"timestampLocal":ts_l})
+
+    hydrate_pd['hydrationSource'] = np.nan
+
+    hydrate_pd['hydrationSource'] = np.nan
+    hydrate_pd['valueInML'] = np.nan
+    hydrate_pd['activityId'] = np.nan
+    hydrate_pd['capped'] = np.nan
+    hydrate_pd['estimatedSweatLossInML'] = np.nan
+    hydrate_pd['duration'] = np.nan
+
+    for i in range(len(j)):
+        sesh = j[i]
+        for k,v in sesh.items():
+            # Already used
+            if k in ['persistedTimestampGMT','timestampLocal']:
+                continue
+            # Redundant/useless
+            elif k in ['userProfilePK','calendarDate']:
+                continue
+            elif k in hydrate_pd.columns:
+                try:
+                    hydrate_pd.loc[i,k] = v
+                except:
+                    print('bad',k)
+            else:
+                print(k)
+
+    return(hydrate_pd)
+    
 ### DI-Connect-Fitness Files ###
 
 # summarizedActivities.json
