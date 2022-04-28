@@ -263,7 +263,129 @@ def build_hydration_data(file_name):
                 print(k)
 
     return(hydrate_pd)
-    
+
+
+
+# UDSFile_ file
+def build_uds_data(file_name):
+    with open(file_name) as file:
+        j = json.load(file)
+
+    ts_g = []
+    ts_l = []
+    for i in range(len(j)):
+        ts_g.append(j[i]['wellnessStartTimeGmt']['date'])
+        ts_l.append(j[i]['wellnessStartTimeLocal']['date'])
+
+    uds_pd = pd.DataFrame({"timestampStartGMT":ts_g,"timestampStartLocal":ts_l})
+
+    # Listing all features for easy lookup later
+    for col in [
+                # Distance & Time Features
+                "durationInMilliseconds","totalKilocalories",
+                "activeKilocalories","bmrKilocalories","wellnessKilocalories","remainingKilocalories",
+                "wellnessTotalKilocalories","wellnessActiveKilocalories","totalSteps",
+                "dailyStepGoal","totalDistanceMeters","wellnessDistanceMeters","wellnessEndTimeGmt",
+                "wellnessEndTimeLocal","highlyActiveSeconds","activeSeconds","moderateIntensityMinutes",
+                "vigorousIntensityMinutes","floorsAscendedInMeters","floorsDescendedInMeters",
+                "userIntensityMinutesGoal","userFloorsAscendedGoal","restingCaloriesFromActivity",
+
+
+                # HR Features
+                "minHeartRate","maxHeartRate","minAvgHeartRate","maxAvgHeartRate",
+                "restingHeartRate","currentDayRestingHeartRate","restingHeartRateTimestamp",
+
+                # Flags
+                "includesWellnessData","includesActivityData","includesCalorieConsumedData",
+                "includesSingleMeasurement","includesContinuousMeasurement","includesAllDayPulseOx",
+                "includesSleepPulseOx",
+
+                # Stress Features
+                "totalAverageStressLevel","totalAverageStressLevelIntensity",
+                "totalMaxStressLevel","totalStressIntensityCount","totalStressOffWristCount",
+                "totalStressTooActiveCount","totalStressCount","totalStressIntensity","totalStressDuration",
+                "totalStressRestDuration","totalStressActivityDuration","totalStressUncategorizedDuration",
+                "StresstotalDuration","totalStressLowDuration","totalStressMediumDuration",
+                "awakeAverageStressLevel","awakeAverageStressLevelIntensity","awakeMaxStressLevel",
+                "awakeStressIntensityCount","awakeStressOffWristCount","awakeStressTooActiveCount",
+                "awakeTotalStressCount","awakeTotalStressIntensity","awakeStressDuration",
+                "awakeStressRestDuration","awakeStressActivityDuration","awakeStressUncategorizedDuration",
+                "awakeStressTotalDuration","awakeStressLowDuration","awakeStressMediumDuration",
+                "sleepAverageStressLevel","sleepAverageStressLevelIntensity",
+                "totalStressHighDuration","awakeStressHighDuration","sleepMaxStressLevel",
+                "sleepStressIntensityCount","sleepStressOffWristCount","sleepStressTooActiveCount",
+                "sleepTotalStressCount","sleepTotalStressIntensity","sleepStressDuration",
+                "sleepStressRestDuration","sleepStressActivityDuration","sleepStressUncategorizedDuration",
+                "sleepStressTotalDuration","sleepStressLowDuration","sleepStressMediumDuration",
+                "sleepStressHighDuration"
+
+                # Body Battery Features
+                "maxBodyBattery","maxBodyBatteryTimestamp","minBodyBattery",
+                "minBodyBatteryTimestamp","EODbodyBattery","EODbodyBatteryTimestamp",
+
+                # Respiration Features
+                "avgWakingRespirationValue","highestRespirationValue","lowestRespirationValue",
+                "latestRespirationValue","latestRespirationTimeGMT",
+
+                # SPO2 Features
+                "lowestSpo2Value","latestSpo2Value","latestSpo2ValueReadingTimeGmt",
+                "latestSpo2ValueReadingTimeLocal"
+                ]:
+        uds_pd[col] = np.nan
+    bad = []
+    for i in range(len(j)):
+        for key,value in j[i].items():
+            if key in ['wellnessStartTimeGmt','wellnessStartTimeLocal','calendarDate',
+                       'userProfilePK','hydration','uuid','version','source']:
+                continue
+            elif key in ['wellnessEndTimeGmt','wellnessEndTimeLocal',
+                         'latestSpo2ValueReadingTimeGmt','latestSpo2ValueReadingTimeLocal']:
+                uds_pd.loc[i,key]=value['date']
+            elif key == 'allDayStress':
+                for stress_dict in j[i][key]['aggregatorList']:
+
+                    for stress_key,stress_value in stress_dict.items():
+                        if 'stress' not in stress_key.lower():
+                            a = 'Stress'
+                        else:
+                            a = ''
+                        if stress_key == 'type':
+                            continue
+                        if (stress_dict['type'] == 'TOTAL') and ('total' in stress_key):
+                            stress_key2 = a+stress_key
+                        elif stress_dict['type'] == 'ASLEEP':
+                            stress_key2 = 'sleep'+a+stress_key[0].upper()+stress_key[1:]
+                        else:
+                            stress_key2 = stress_dict['type'].lower()+a+stress_key[0].upper()+stress_key[1:]
+
+                        uds_pd.loc[i,stress_key2]=stress_value
+            elif key == 'bodyBattery':
+                for batt_dict in j[i][key]['bodyBatteryStatList']:
+                    bb_type = batt_dict['bodyBatteryStatType']
+                    if bb_type in ['HIGHEST','LOWEST']:
+                        if bb_type == 'HIGHEST':
+                            b = 'max'
+                        else:
+                            b = 'min'
+                        uds_pd.loc[i,b+'BodyBattery'] =  batt_dict['statsValue']
+                        uds_pd.loc[i,b+'BodyBatteryTimestamp'] =  batt_dict['statTimestamp']['date']
+                    elif bb_type == 'ENDOFDAY':
+                        uds_pd.loc[i,'EODbodyBattery'] =  batt_dict['statsValue']
+                        uds_pd.loc[i,'EODbodyBatteryTimestamp'] =  batt_dict['statTimestamp']['date']
+
+
+            elif key == 'respiration':
+                for resp_key, resp_value in j[i][key].items():
+                    if resp_key in ['userProfilePK','calendarDate']:
+                        continue
+                    elif resp_key == 'latestRespirationTimeGMT':
+                        uds_pd.loc[i,resp_key]=resp_value['date']
+                    else:
+                        uds_pd.loc[i,resp_key]=resp_value
+            else:
+                uds_pd.loc[i,key]=value
+    return(uds_pd.copy())
+
 ### DI-Connect-Fitness Files ###
 
 # summarizedActivities.json
