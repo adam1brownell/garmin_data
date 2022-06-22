@@ -9,6 +9,7 @@ def main(connect_folder):
     tmp_root = os.getcwd()+'/DI_CONNECT'
     for folder_name in os.listdir(tmp_root):
         tmp_folder = tmp_root+'/'+folder_name
+        
         ### DI-Connect-Wellness Files ###
         if folder_name == 'DI-Connect-Wellness':
             for file_name in os.listdir(tmp_folder):

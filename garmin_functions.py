@@ -485,3 +485,39 @@ def build_activity_summary_data(file_name):
                 activity_pd.loc[i,key] = value
 
     return(activity_pd,activity_set_pd)
+
+## FIT Files ##
+
+def generate_fit_files(FitCSVToolJar,tmp_root):
+    from zipfile import ZipFile
+    import subprocess
+
+    with ZipFile(tmp_root+'UploadedFiles_0-_Part1.zip', 'r') as zipObj:
+        fitFiles = zipObj.namelist()
+        zipObj.extractall(tmp_root)
+
+    for file in fitFiles:
+        print(file)
+
+        inputfile = tmp_root+file
+        outputfile = tmp_root+file.replace(".fit","_raw.csv")
+        os.system(f'java -jar {FitCSVToolJar} -b "{inputfile}" "{inputfile.replace(".fit","_raw.csv")}"')
+        os.system(f'java -jar {FitCSVToolJar} -b "{inputfile}" "{inputfile.replace(".fit","_records.csv")}"  --defn none --data record')
+        os.remove(inputfile)
+
+
+    old_root = os.getcwd()
+    os.chdir(tmp_root)
+
+    os.system("cat *_records.csv >combined_records_full.csv")
+    os.system("cat *_raw.csv >combined_raw_full.csv")
+    os.chdir(old_root)
+
+    ## TODO: Can change this to a python func if needed
+    os.system(f'python clean_garmin.py -i {tmp_root+"/combined_records_full.csv"} -o {tmp_root+"/combined_records_clean.csv"}')
+    os.system(f'python clean_garmin.py -i {tmp_root+"/combined_raw_full.csv"} -o {tmp_root+"/combined_raw_clean.csv"}')
+
+    for file in os.listdir(tmp_root):
+        if '.csv' in file:
+            if 'clean' not in file:
+                os.remove(tmp_root+"/"+file)
