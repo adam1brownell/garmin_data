@@ -4,12 +4,12 @@ from garmin_functions import *
 import warnings
 warnings.filterwarnings('ignore')
 
-def main(connect_folder):
+def main(connect_folder, FitCSVToolJar):
 
     tmp_root = os.getcwd()+'/DI_CONNECT'
     for folder_name in os.listdir(tmp_root):
         tmp_folder = tmp_root+'/'+folder_name
-        
+
         ### DI-Connect-Wellness Files ###
         if folder_name == 'DI-Connect-Wellness':
             for file_name in os.listdir(tmp_folder):
@@ -34,8 +34,16 @@ def main(connect_folder):
                 if 'summarizedActivities' in file_name:
                     activity_pd,activity_set_pd = build_activity_summary_data(tmp_folder+'/'+file_name)
 
+        ### DI-Connect-Fitness Files ###
+        elif folder_name == "DI-Connect-Fitness-Upload-Files":
+            for file_name in os.listdir(tmp_folder):
+                if 'UploadedFiles' in file_name:
+                    if os.path.exists(FitCSVToolJar):
+                        generate_fit_files(FitCSVToolJar,tmp_root,file_name)
+                    else:
+                        print("FitCSVJar Path is invalid!")
 
     return
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[1])
