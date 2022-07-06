@@ -45,9 +45,10 @@ def build_health_snapshot_data(file_name):
         end_gmt.append(pd.Timestamp(sesh['endTimestampGMT']))
         day_type.append(sesh['snapshotTimeOfDayType'])
 
+
     health_snap_pd = pd.DataFrame({"name":name,"timeOfDay":day_type,
-                                   "localStart":start_local,"localEnd":end_local,
-                                   "gmtStart":start_gmt,"gmtEnd":end_gmt})
+                                   "startTimeLocal":start_local,"endTimeLocal":end_local,
+                                   "startTimeGmt":start_gmt,"endTimeGmt":end_gmt})
 
     health_snap_pd['heartRateMin'] = np.nan
     health_snap_pd['heartRateMax'] = np.nan
@@ -127,7 +128,7 @@ def build_sleep_data(file_name):
         sleep_end.append(sesh['sleepEndTimestampGMT'])
         date.append(sesh['calendarDate'])
 
-    sleep_pd = pd.DataFrame({"gmtStart":sleep_start,"gmtEnd":sleep_end,"date":date})
+    sleep_pd = pd.DataFrame({"startTimeGmt":sleep_start,"endTimeGmt":sleep_end,"date":date})
 
     # There are metrics that could be dropped by snapshot
     # hence the double loop
@@ -189,7 +190,7 @@ def build_fitness_age_data(file_name):
     for i in range(len(j)):
         ts.append(j[i]["createTimestamp"]['date'])
 
-    fitness_age_pd = pd.DataFrame({"readingTimestamp":ts})
+    fitness_age_pd = pd.DataFrame({"startTimeGmt":ts})
 
     fitness_age_pd['chronologicalAge'] = np.nan
 
@@ -234,7 +235,7 @@ def build_hydration_data(file_name):
         ts_g.append(j[i]['persistedTimestampGMT']['date'])
         ts_l.append(j[i]['timestampLocal']['date'])
 
-    hydrate_pd = pd.DataFrame({"timestampGMT":ts_g,"timestampLocal":ts_l})
+    hydrate_pd = pd.DataFrame({"startTimeGmt":ts_g,"startTimeLocal":ts_l})
 
     hydrate_pd['hydrationSource'] = np.nan
 
@@ -277,7 +278,7 @@ def build_uds_data(file_name):
         ts_g.append(j[i]['wellnessStartTimeGmt']['date'])
         ts_l.append(j[i]['wellnessStartTimeLocal']['date'])
 
-    uds_pd = pd.DataFrame({"timestampStartGMT":ts_g,"timestampStartLocal":ts_l})
+    uds_pd = pd.DataFrame({"startTimeGmt":ts_g,"startTimeLocal":ts_l})
 
     # Listing all features for easy lookup later
     for col in [
@@ -488,11 +489,11 @@ def build_activity_summary_data(file_name):
 
 ## FIT Files ##
 
-def generate_fit_files(FitCSVToolJar,tmp_root):
+def generate_fit_files(FitCSVToolJar,tmp_root,file_name):
     from zipfile import ZipFile
     import subprocess
 
-    with ZipFile(tmp_root+'UploadedFiles_0-_Part1.zip', 'r') as zipObj:
+    with ZipFile(tmp_root+file_name, 'r') as zipObj:
         fitFiles = zipObj.namelist()
         zipObj.extractall(tmp_root)
 
@@ -521,3 +522,4 @@ def generate_fit_files(FitCSVToolJar,tmp_root):
         if '.csv' in file:
             if 'clean' not in file:
                 os.remove(tmp_root+"/"+file)
+
