@@ -124,8 +124,8 @@ def build_sleep_data(file_name):
 
     for i in range(len(j)):
         sesh = j[i]
-        sleep_start.append(sesh['sleepStartTimestampGMT'])
-        sleep_end.append(sesh['sleepEndTimestampGMT'])
+        sleep_start.append(pd.Timestamp(sesh['sleepStartTimestampGMT']))
+        sleep_end.append(pd.Timestamp(sesh['sleepEndTimestampGMT']))
         date.append(sesh['calendarDate'])
 
     sleep_pd = pd.DataFrame({"startTimeGmt":sleep_start,"endTimeGmt":sleep_end,"date":date})
@@ -188,7 +188,7 @@ def build_fitness_age_data(file_name):
         j = json.load(file)
     ts = []
     for i in range(len(j)):
-        ts.append(j[i]["createTimestamp"]['date'])
+        ts.append(pd.Timestamp(j[i]["createTimestamp"]['date']))
 
     fitness_age_pd = pd.DataFrame({"startTimeGmt":ts})
 
@@ -232,8 +232,8 @@ def build_hydration_data(file_name):
     ts_g = []
     ts_l = []
     for i in range(len(j)):
-        ts_g.append(j[i]['persistedTimestampGMT']['date'])
-        ts_l.append(j[i]['timestampLocal']['date'])
+        ts_g.append(pd.Timestamp(j[i]['persistedTimestampGMT']['date']))
+        ts_l.append(pd.Timestamp(j[i]['timestampLocal']['date']))
 
     hydrate_pd = pd.DataFrame({"startTimeGmt":ts_g,"startTimeLocal":ts_l})
 
@@ -275,8 +275,8 @@ def build_uds_data(file_name):
     ts_g = []
     ts_l = []
     for i in range(len(j)):
-        ts_g.append(j[i]['wellnessStartTimeGmt']['date'])
-        ts_l.append(j[i]['wellnessStartTimeLocal']['date'])
+        ts_g.append(pd.Timestamp(j[i]['wellnessStartTimeGmt']['date']))
+        ts_l.append(pd.Timestamp(j[i]['wellnessStartTimeLocal']['date']))
 
     uds_pd = pd.DataFrame({"startTimeGmt":ts_g,"startTimeLocal":ts_l})
 
@@ -390,6 +390,8 @@ def build_uds_data(file_name):
 ### DI-Connect-Fitness Files ###
 
 # summarizedActivities.json
+
+## TODO: starttimeGMT is in 1970 (because it's a date, not timestamp)
 def build_activity_summary_data(file_name):
     """
         Take in ...summarizedActivities.json file and output pandas
@@ -485,7 +487,16 @@ def build_activity_summary_data(file_name):
             elif key in activity_pd.columns:
                 activity_pd.loc[i,key] = value
 
-    return(activity_pd,activity_set_pd)
+    # for pdf in [activity_pd,activity_set_pd]:
+    #     pdf['startTimeGmt'] = pd.to_datetime(pdf.startTimeGmt, unit='ms')
+
+
+    activity_pd = activity_pd.merge(activity_set_pd,on='startTimeGmt',how='outer')
+
+    activity_pd['startTimeGmt'] = pd.to_datetime(activity_pd.startTimeGmt, unit='ms')
+    activity_pd['startTimeLocal'] = pd.to_datetime(activity_pd.startTimeLocal, unit='ms')
+
+    return(activity_pd)
 
 ## FIT Files ##
 
@@ -522,4 +533,3 @@ def generate_fit_files(FitCSVToolJar,tmp_root,file_name):
         if '.csv' in file:
             if 'clean' not in file:
                 os.remove(tmp_root+"/"+file)
-

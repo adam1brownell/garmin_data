@@ -23,9 +23,13 @@ def main(connect_folder, FitCSVToolJar):
     for folder_name in os.listdir(tmp_root):
         tmp_folder = tmp_root+'/'+folder_name
 
+
         ### DI-Connect-Wellness Files ###
         if folder_name == 'DI-Connect-Wellness':
             for file_name in os.listdir(tmp_folder):
+
+                join_cols = ['startTimeGmt']
+
                 if 'wellnessActivities' in file_name:
 
                     print("Pulling Heath Snapshot data...")
@@ -34,7 +38,18 @@ def main(connect_folder, FitCSVToolJar):
                     print(f"\t{len(health_snapshot_pd):,} entrees..")
                     print(f"\tJoinable Key: {'startTimeGmt' in health_snapshot_pd.columns}")
 
-                    garmin_pd = garmin_pd.merge(health_snapshot_pd,on='startTimeGmt',how="outer") \
+                    if 'startTimeLocal' in garmin_pd.columns:
+                        join_cols.append('startTimeLocal')
+                    if 'endTimeGmt' in garmin_pd.columns:
+                        join_cols.append('endTimeGmt')
+                    if 'respirationMin' in garmin_pd.columns:
+                        join_cols.append('respirationMin')
+                    if 'respirationMax' in garmin_pd.columns:
+                        join_cols.append('respirationMax')
+                    if 'respirationMax' in garmin_pd.columns:
+                        join_cols.append('respirationAvg')
+
+                    garmin_pd = garmin_pd.merge(health_snapshot_pd,on=join_cols,how="outer") \
                                          .fillna({'dataType':'healthSnapshot'})
 
                 elif 'sleepData' in file_name:
@@ -45,12 +60,24 @@ def main(connect_folder, FitCSVToolJar):
                     print(f"\t{len(sleep_pd):,} entrees..")
                     print(f"\tJoinable Key: {'startTimeGmt' in sleep_pd.columns}")
 
-                    garmin_pd = garmin_pd.merge(sleep_pd,on='startTimeGmt',how="outer") \
-                                         .fillna({'dataType':'healthSnapshot'})
+                    if 'endTimeGmt' in garmin_pd.columns:
+                        join_cols.append('endTimeGmt')
+                    if 'respirationMin' in garmin_pd.columns:
+                        join_cols.append('respirationMin')
+                    if 'respirationMax' in garmin_pd.columns:
+                        join_cols.append('respirationMax')
+                    if 'respirationMax' in garmin_pd.columns:
+                        join_cols.append('respirationAvg')
+
+                    garmin_pd = garmin_pd.merge(sleep_pd,on=join_cols,how="outer") \
+                                         .fillna({'dataType':'sleepData'})
 
         ### DI-Connect-User Files ###
         elif folder_name == 'DI-Connect-User':
             for file_name in os.listdir(tmp_folder):
+
+                join_cols = ['startTimeGmt']
+
                 if 'FitnessAgeData' in file_name:
 
                     print("Fitness Age data...")
@@ -59,7 +86,7 @@ def main(connect_folder, FitCSVToolJar):
                     print(f"\t{len(fitness_age_pd):,} entrees..")
                     print(f"\tJoinable Key: {'startTimeGmt' in fitness_age_pd.columns}")
 
-                    garmin_pd = garmin_pd.merge(fitness_age_pd,on='startTimeGmt',how="outer") \
+                    garmin_pd = garmin_pd.merge(fitness_age_pd,on=join_cols,how="outer") \
                                          .fillna({'dataType':'fitnessAge'})
 
                 elif 'HydrationLogFile' in file_name:
@@ -70,7 +97,11 @@ def main(connect_folder, FitCSVToolJar):
                     print(f"\t{len(hydration_pd):,} entrees..")
                     print(f"\tJoinable Key: {'startTimeGmt' in hydration_pd.columns}")
 
-                    garmin_pd = garmin_pd.merge(hydration_pd,on='startTimeGmt',how="outer") \
+
+                    if 'startTimeLocal' in garmin_pd.columns:
+                        join_cols.append('startTimeLocal')
+
+                    garmin_pd = garmin_pd.merge(hydration_pd,on=join_cols,how="outer") \
                                          .fillna({'dataType':'hydrationData'})
 
                 elif 'UDSFile_' in file_name:
@@ -81,29 +112,40 @@ def main(connect_folder, FitCSVToolJar):
                     print(f"\t{len(uds_pd):,} entrees..")
                     print(f"\tJoinable Key: {'startTimeGmt' in uds_pd.columns}")
 
-                    garmin_pd = garmin_pd.merge(uds_pd,on='startTimeGmt',how="outer") \
+                    if 'startTimeLocal' in garmin_pd.columns:
+                        join_cols.append('startTimeLocal')
+
+                    garmin_pd = garmin_pd.merge(uds_pd,on=join_cols,how="outer") \
                                          .fillna({'dataType':'UDS'})
 
         ### DI-Connect-Fitness Files ###
         elif folder_name == 'DI-Connect-Fitness':
             for file_name in os.listdir(tmp_folder):
+
+                join_cols = ['startTimeGmt']
+
                 if 'summarizedActivities' in file_name:
 
                     print("Activity data...")
-                    activity_pd,activity_set_pd = build_activity_summary_data(tmp_folder+'/'+file_name)
+                    # activity_pd,activity_set_pd = build_activity_summary_data(tmp_folder+'/'+file_name)
+                    activity_pd = build_activity_summary_data(tmp_folder+'/'+file_name)
 
                     print(f"\t{len(activity_pd):,} entrees..")
                     print(f"\tJoinable Key: {'startTimeGmt' in activity_pd.columns}")
-                    print(f"\t{len(activity_set_pd):,} set entrees..")
-                    print(f"\tJoinable Key: {'startTimeGmt' in activity_set_pd.columns}")
 
-                    garmin_pd = garmin_pd.merge(activity_pd,on='startTimeGmt',how="outer") \
-                                         .merge(activity_set_pd,on='startTimeGmt',how="outer") \
+
+                    if 'startTimeLocal' in garmin_pd.columns:
+                        join_cols.append('startTimeLocal')
+
+                    garmin_pd = garmin_pd.merge(activity_pd,on=join_cols,how="outer") \
                                          .fillna({'dataType':'activityData'})
 
         ### DI-Connect-Fitness Files ###
         elif folder_name == "DI-Connect-Fitness-Upload-Files":
             for file_name in os.listdir(tmp_folder):
+
+                join_cols = ['startTimeGmt']
+
                 if 'UploadedFiles' in file_name:
                     if os.path.exists(FitCSVToolJar):
                         generate_fit_files(FitCSVToolJar,tmp_root,file_name)
