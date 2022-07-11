@@ -174,6 +174,7 @@ def main(connect_folder, FitCSVToolJar):
                     else:
                         print("FitCSVJar Path is invalid!")
 
+    
     garmin_pd.to_csv("garmin_data.csv")
     return
 

@@ -90,6 +90,9 @@ def main(argv):
         g_dict[col] = lambda x: np.max(x)
 
     bd_data = bd_data.groupby('timestamp').agg(g_dict).drop(['timestamp'],axis=1).reset_index()
+
+    bd_data['timestamp'] = pd.to_datetime(bd_data.timestamp+631065600, unit='s')
+
     print(f" Reduced down file to {len(bd_data):,} rows of CLEAN data...")
     print("Saving...")
     bd_data.to_csv(outputfile)
