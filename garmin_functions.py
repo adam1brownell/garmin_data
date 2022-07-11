@@ -509,15 +509,20 @@ def generate_fit_files(FitCSVToolJar,tmp_root,file_name):
     from zipfile import ZipFile
     import subprocess
 
-    with ZipFile(tmp_root+file_name, 'r') as zipObj:
+    ## Tester
+    # inputfile = "/Users/adambrownell/passion_projects/garmin_project/garmin_data/DI_CONNECT/DI-Connect-Fitness-Uploaded-Files/adam1brownell@gmail.com_131410629361.fit"
+    # outputfile = inputfile.replace(".fit","_raw.csv")
+    # os.system(f'java -jar {FitCSVToolJar} -b "{inputfile}" "{outputfile}"')
+    # return
+
+
+    with ZipFile(tmp_root+"/"+file_name, 'r') as zipObj:
         fitFiles = zipObj.namelist()
         zipObj.extractall(tmp_root)
 
     for file in fitFiles:
-        print(file)
 
-        inputfile = tmp_root+file
-        outputfile = tmp_root+file.replace(".fit","_raw.csv")
+        inputfile = tmp_root+"/"+file
         os.system(f'java -jar {FitCSVToolJar} -b "{inputfile}" "{inputfile.replace(".fit","_raw.csv")}"')
         os.system(f'java -jar {FitCSVToolJar} -b "{inputfile}" "{inputfile.replace(".fit","_records.csv")}"  --defn none --data record')
         os.remove(inputfile)
