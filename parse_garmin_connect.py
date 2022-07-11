@@ -46,8 +46,10 @@ def main(connect_folder, FitCSVToolJar):
                         join_cols.append('respirationMin')
                     if 'respirationMax' in garmin_pd.columns:
                         join_cols.append('respirationMax')
-                    if 'respirationMax' in garmin_pd.columns:
+                    if 'respirationAvg' in garmin_pd.columns:
                         join_cols.append('respirationAvg')
+                    if 'name' in garmin_pd.columns:
+                        join_cols.append('name')
 
                     garmin_pd = garmin_pd.merge(health_snapshot_pd,on=join_cols,how="outer") \
                                          .fillna({'dataType':'healthSnapshot'})
@@ -66,7 +68,7 @@ def main(connect_folder, FitCSVToolJar):
                         join_cols.append('respirationMin')
                     if 'respirationMax' in garmin_pd.columns:
                         join_cols.append('respirationMax')
-                    if 'respirationMax' in garmin_pd.columns:
+                    if 'respirationAvg' in garmin_pd.columns:
                         join_cols.append('respirationAvg')
 
                     garmin_pd = garmin_pd.merge(sleep_pd,on=join_cols,how="outer") \
@@ -100,6 +102,10 @@ def main(connect_folder, FitCSVToolJar):
 
                     if 'startTimeLocal' in garmin_pd.columns:
                         join_cols.append('startTimeLocal')
+                    if 'duration' in garmin_pd.columns:
+                        join_cols.append('duration')
+                    if 'activityId' in garmin_pd.columns:
+                        join_cols.append('activityId')
 
                     garmin_pd = garmin_pd.merge(hydration_pd,on=join_cols,how="outer") \
                                          .fillna({'dataType':'hydrationData'})
@@ -114,6 +120,10 @@ def main(connect_folder, FitCSVToolJar):
 
                     if 'startTimeLocal' in garmin_pd.columns:
                         join_cols.append('startTimeLocal')
+                    if 'moderateIntensityMinutes' in garmin_pd.columns:
+                        join_cols.append('moderateIntensityMinutes')
+                    if 'vigorousIntensityMinutes' in garmin_pd.columns:
+                        join_cols.append('vigorousIntensityMinutes')
 
                     garmin_pd = garmin_pd.merge(uds_pd,on=join_cols,how="outer") \
                                          .fillna({'dataType':'UDS'})
@@ -136,6 +146,22 @@ def main(connect_folder, FitCSVToolJar):
 
                     if 'startTimeLocal' in garmin_pd.columns:
                         join_cols.append('startTimeLocal')
+                    if 'name' in garmin_pd.columns:
+                        join_cols.append('name')
+                    if 'duration' in garmin_pd.columns:
+                        join_cols.append('duration')
+                    if 'moderateIntensityMinutes' in garmin_pd.columns:
+                        join_cols.append('moderateIntensityMinutes')
+                    if 'vigorousIntensityMinutes' in garmin_pd.columns:
+                        join_cols.append('vigorousIntensityMinutes')
+                    if 'activityId' in garmin_pd.columns:
+                        join_cols.append('activityId')
+                    if 'respirationMin' in garmin_pd.columns:
+                        join_cols.append('respirationMin')
+                    if 'respirationMax' in garmin_pd.columns:
+                        join_cols.append('respirationMax')
+                    if 'respirationAvg' in garmin_pd.columns:
+                        join_cols.append('respirationAvg')
 
                     garmin_pd = garmin_pd.merge(activity_pd,on=join_cols,how="outer") \
                                          .fillna({'dataType':'activityData'})

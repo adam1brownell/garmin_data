@@ -487,14 +487,19 @@ def build_activity_summary_data(file_name):
             elif key in activity_pd.columns:
                 activity_pd.loc[i,key] = value
 
-    # for pdf in [activity_pd,activity_set_pd]:
-    #     pdf['startTimeGmt'] = pd.to_datetime(pdf.startTimeGmt, unit='ms')
+    activity_set_pd['setDuration'] = activity_set_pd.duration
+    activity_set_pd.drop(["duration"],axis=1,inplace=True)
 
 
-    activity_pd = activity_pd.merge(activity_set_pd,on='startTimeGmt',how='outer')
+    activity_pd = activity_pd.merge(activity_set_pd,on=['startTimeGmt','activityId'],how='outer')
 
     activity_pd['startTimeGmt'] = pd.to_datetime(activity_pd.startTimeGmt, unit='ms')
     activity_pd['startTimeLocal'] = pd.to_datetime(activity_pd.startTimeLocal, unit='ms')
+
+    activity_pd['respirationMin'] = activity_pd.minRespirationRate
+    activity_pd['respirationMax'] = activity_pd.maxRespirationRate
+    activity_pd['respirationAvg'] = activity_pd.avgRespirationRate
+    activity_pd.drop(["minRespirationRate","maxRespirationRate","avgRespirationRate"],axis=1,inplace=True)
 
     return(activity_pd)
 
